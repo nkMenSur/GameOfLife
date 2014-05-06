@@ -2,6 +2,6 @@ tot & nachbarn === 3 => wird lebendig
 
 lebend & nachbarn(2 || 3) => bleibt am leben
 
-lebend & nachbarn <= 2  => wird sterben
+lebend & nachbarn < 2  => wird sterben
 
-lebend & nachbarn >= 3 => wird sterben
+lebend & nachbarn > 3 => wird sterben

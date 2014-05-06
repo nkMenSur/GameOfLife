@@ -15,13 +15,13 @@ var Constants = {
     BackgroundCanvasColor: '#bef093'
   },
   measurements: {
-    BrickWidth: 10,
-    BrickHeight: 10,
-    CanvasHeight: 600,
-    CanvasWidth: 800,
+    BrickWidth: 5,
+    BrickHeight: 5,
+    CanvasHeight: 500,
+    CanvasWidth: 500,
   },
   times: {
-    MillisecondsPerTick: 1000
+    MillisecondsPerTick: 10
   },
   ChanceOfLife: 100
 }

@@ -25,8 +25,9 @@ function createGrid(){
 	for (var x = 0; x < Constants.measurements.CanvasWidth / Constants.measurements.BrickWidth; x++) {
 		for (var y = 0; y < Constants.measurements.CanvasHeight / Constants.measurements.BrickHeight; y++) {
 			Grid[x+'|'+y] = new Cell(x, y, spwanAliveOrDead());
-		};
-	};
+			NextGrid[x+'|'+y] = new Cell(Grid[x+'|'+y].x, Grid[x+'|'+y].y, Grid[x+'|'+y].isAlive); 
+		}
+	}
 }
 
 function populateGrid(ctx) {
@@ -35,7 +36,7 @@ function populateGrid(ctx) {
  	context.clearRect(0, 0, Constants.measurements.CanvasWidth, Constants.measurements.CanvasHeight);
 
  	for (var key in Grid) {
- 		var cell = Grid[key];
+ 		var cell = NextGrid[key];
 
 		if (cell.isAlive){
 			context.fillRect(cell.x * Constants.measurements.BrickWidth, cell.y * Constants.measurements.BrickHeight, Constants.measurements.BrickWidth, Constants.measurements.BrickWidth)
@@ -44,56 +45,46 @@ function populateGrid(ctx) {
 }
 
 function getNeigbours(x, y) {
+	
 	var count = 0;
 
 	if (Grid[x+'|'+y] != undefined ) {
-		/*top neighbour*/
-		if (Grid[x+'|'+(y-1)] != undefined && Grid[x+'|'+(y-1)].isAlive) {
-		  count++;
-		}
-		
-		if (Grid[(x+1)+'|'+(y-1)] != undefined && Grid[(x+1)+'|'+(y-1)].isAlive) {
-			count++;
-		}
 
-		if (Grid[(x+1)+'|'+y] != undefined && Grid[(x+1)+'|'+y].isAlive) {
-			count++;
-		}
+		if (Grid[x+'|'+(y-1)] != undefined && Grid[x+'|'+(y-1)].isAlive) { count++; }
+		if (Grid[(x+1)+'|'+(y-1)] != undefined && Grid[(x+1)+'|'+(y-1)].isAlive) { count++;	}
+		if (Grid[(x+1)+'|'+y] != undefined && Grid[(x+1)+'|'+y].isAlive) { count++;	}
+		if (Grid[(x+1)+'|'+(y+1)] != undefined && Grid[(x+1)+'|'+(y+1)].isAlive) { count++;	}
+		if (Grid[x +'|' + (y+1)] != undefined && Grid[x +'|' + (y+1)].isAlive) { count++;	}
+		if (Grid[(x-1)+'|'+(y+1)] != undefined && Grid[(x-1)+'|'+(y+1)].isAlive) { count++;	}
+		if (Grid[(x-1)+'|'+y] != undefined && Grid[(x-1)+'|'+y].isAlive) { count++;	}
+		if (Grid[(x-1)+'|'+(y-1)] != undefined && Grid[(x-1)+'|'+(y-1)].isAlive) { count++;	}
 
-		if (Grid[(x+1)+'|'+(y+1)] != undefined && Grid[(x+1)+'|'+(y+1)].isAlive) {
-			count++;
-		}
-
-		if (Grid[x +'|' + (y+1)] != undefined && Grid[x +'|' + (y+1)].isAlive) {
-			count++;
-		}
-		
-		if (Grid[(x-1)+'|'+(y+1)] != undefined && Grid[(x-1)+'|'+(y+1)].isAlive) {
-			count++;
-		}
-		
-		if (Grid[(x-1)+'|'+y] != undefined && Grid[(x-1)+'|'+y].isAlive) {
-			count++;
-		}
-		
-		if (Grid[(x-1)+'|'+(y-1)] != undefined && Grid[(x-1)+'|'+(y-1)].isAlive) {
-			count++;
-		}
-		
 		return count;		
 	}
 }
 
-function prepareNextGeneration(){
+function refreshGrids () {
+	for (var x = 0; x < Constants.measurements.CanvasWidth / Constants.measurements.BrickWidth; x++) {
+		for (var y = 0; y < Constants.measurements.CanvasHeight / Constants.measurements.BrickHeight; y++) {
+			Grid[x+'|'+y] = new Cell(NextGrid[x+'|'+y].x, NextGrid[x+'|'+y].y, NextGrid[x+'|'+y].isAlive); 
+		}
+	}
+}
+
+function prepareNextGeneration() {
 	for (var x = 0; x < Constants.measurements.CanvasWidth / Constants.measurements.BrickWidth; x++) {
 		for (var y = 0; y < Constants.measurements.CanvasHeight / Constants.measurements.BrickHeight; y++) {
 			var currentCell = Grid[x+'|'+y];
-			if (!currentCell.isAlive && getNeigbours(x, y) === 3 ) { currentCell.isAlive = true; }
-			else if (currentCell.isAlive && getNeigbours(x, y) === 2 || getNeigbours(x, y) === 3) { currentCell.isAlive = true; }
-			else if (currentCell.isAlive && getNeigbours(x, y) <= 2) { currentCell.isAlive = false; }
-			else if (currentCell.isAlive && getNeigbours(x, y) >= 3) { currentCell.isAlive = false; }	
-		};
-	};
+			var nextCell = NextGrid[x+'|'+y];
+
+			if (!currentCell.isAlive && getNeigbours(x, y) === 3 ) { nextCell.isAlive = true; }
+			else if (currentCell.isAlive && (getNeigbours(x, y) === 2 || getNeigbours(x, y) === 3)) { nextCell.isAlive = true; }
+			else if (currentCell.isAlive && getNeigbours(x, y) < 2) { nextCell.isAlive = false; }
+			else if (currentCell.isAlive && getNeigbours(x, y) > 3) { nextCell.isAlive = false; }	
+		}
+	}
+
+	refreshGrids();
 }
 
 function init(ctx){
@@ -102,11 +93,15 @@ function init(ctx){
 }
 
 function looop(ctx){
-	var start = new Date();
-	prepareNextGeneration();
-	populateGrid(ctx);
+	var loopStart = new Date();
+
+	if (new Date() - deltaTime >= Constants.times.MillisecondsPerTick) {
+		prepareNextGeneration();
+		populateGrid(ctx);
+		deltaTime = new Date();
+	}
+	console.log(new	Date - loopStart);
 	requestAnimationFrame(function(){looop(ctx)});
-	console.log('loop-calculation-duration: ' + (new Date - start));
 }
 
 console.log('---Methods loaded---');

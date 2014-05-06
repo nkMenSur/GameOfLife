@@ -1,5 +1,6 @@
 "use strict"
 
 var Grid = {};
-var GridRef = []; 
+var NextGrid = {};
+var deltaTime = 0;
 console.log('---globals loaded---');
